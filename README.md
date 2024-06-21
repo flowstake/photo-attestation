@@ -17,6 +17,8 @@
 
 ## Data Storage and Management
 - **Cloud Storage:** Utilize scalable cloud storage solutions (e.g., Firebase) to handle the large volume of media files. Ensure the storage system can handle peak loads during events.
+- **IPFS Integration:** Use InterPlanetary File System (IPFS) for decentralized media storage. IPFS allows for efficient and distributed storage of media files, ensuring data is accessible and resilient.
+- **Hash-Addressable Content:** Ensure all media files stored in IPFS are hash-addressable, meaning each file is referenced by its unique cryptographic hash. This guarantees data immutability and integrity, as any change in the file content will result in a different hash.
 - **Retention Policies:** Define data retention policies to manage the lifecycle of the media files, including how long they will be stored and when they will be archived or deleted.
 - **Access Control:** Implement strict access control measures to ensure that only authorized users can view or manage the attestation files.
 
@@ -38,5 +40,11 @@
 ## Integration with Other Features
 - **Activity Feed:** Integrate the attested photos and videos into a social feed within the app, allowing users to share their achievements and engage with the community.
 - **Smart Contracts:** Use Ethereum smart contracts to facilitate and enforce sports betting competitions, ensuring that the results based on attested activities are transparent and fair.
+
+## IPFS for Media Storage and Hash-Addressable Content for Data Immutability
+- **Decentralized Storage:** Leverage IPFS to store media files in a decentralized manner. This ensures high availability and resistance to censorship.
+- **Content Hashing:** Utilize content hashing to ensure that each file can be uniquely identified and verified. The hash serves as a unique fingerprint for the file.
+- **Data Integrity:** Guarantee data integrity by ensuring that any alteration in the media file changes its hash, thereby making tampering easily detectable.
+- **Interoperability:** Ensure that the IPFS-stored media files can be accessed and verified across different systems and platforms, promoting interoperability and transparency.
 
 By meeting these requirements, FlowStake technology can create a robust, secure, and user-friendly system for photo and video attestation, enhancing the credibility and engagement of the platform.
