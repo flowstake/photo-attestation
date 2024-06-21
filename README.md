@@ -48,3 +48,326 @@
 - **Interoperability:** Ensure that the IPFS-stored media files can be accessed and verified across different systems and platforms, promoting interoperability and transparency.
 
 By meeting these requirements, FlowStake technology can create a robust, secure, and user-friendly system for photo and video attestation, enhancing the credibility and engagement of the platform.
+
+# FlowStake Technology / Distributed Olympics: Photo/Video Attestation Platform
+
+This project is built using Expo and React Native, integrating IPFS for media storage and blockchain for data immutability.
+
+## Directory Structure
+
+/FlowStakeApp
+  /assets
+  /components
+    /Camera.js
+    /PhotoAttestation.js
+    /VideoAttestation.js
+  /screens
+    /HomeScreen.js
+    /CaptureScreen.js
+    /ProfileScreen.js
+  /utils
+    /ipfs.js
+    /blockchain.js
+  App.js
+  app.json
+  package.json
+  babel.config.js
+
+
+## Code Structure
+
+### `App.js`
+
+```javascript
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import HomeScreen from './screens/HomeScreen';
+import CaptureScreen from './screens/CaptureScreen';
+import ProfileScreen from './screens/ProfileScreen';
+
+const Stack = createStackNavigator();
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Capture" component={CaptureScreen} />
+        <Stack.Screen name="Profile" component={ProfileScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+}
+```
+
+### `Homescreen.js`
+
+```javascript
+import React from 'react';
+import { View, Text, Button, StyleSheet } from 'react-native';
+
+export default function HomeScreen({ navigation }) {
+  return (
+    <View style={styles.container}>
+      <Text>Welcome to FlowStake</Text>
+      <Button
+        title="Capture Activity"
+        onPress={() => navigation.navigate('Capture')}
+      />
+      <Button
+        title="Profile"
+        onPress={() => navigation.navigate('Profile')}
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+```
+
+### `CaptureScreen.js`
+
+```javascript
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import Camera from '../components/Camera';
+
+export default function CaptureScreen() {
+  return (
+    <View style={styles.container}>
+      <Text>Capture your activity</Text>
+      <Camera />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+```
+
+### `ProfileScreen.js`
+
+```javascript
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+
+export default function ProfileScreen() {
+  return (
+    <View style={styles.container}>
+      <Text>Profile</Text>
+      {/* Additional profile details can be added here */}
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+});
+```
+
+### `Camera.js`
+
+```javascript
+import React, { useState, useRef } from 'react';
+import { View, Button, StyleSheet } from 'react-native';
+import { Camera } from 'expo-camera';
+import * as FileSystem from 'expo-file-system';
+import uploadToIPFS from '../utils/ipfs';
+
+export default function CameraComponent() {
+  const [hasPermission, setHasPermission] = useState(null);
+  const cameraRef = useRef(null);
+
+  React.useEffect(() => {
+    (async () => {
+      const { status } = await Camera.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
+  }, []);
+
+  const takePicture = async () => {
+    if (cameraRef.current) {
+      const photo = await cameraRef.current.takePictureAsync();
+      await uploadToIPFS(photo.uri);
+    }
+  };
+
+  if (hasPermission === null) {
+    return <View />;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+  return (
+    <View style={styles.container}>
+      <Camera style={styles.camera} type={Camera.Constants.Type.back} ref={cameraRef}>
+        <View style={styles.buttonContainer}>
+          <Button title="Take Picture" onPress={takePicture} />
+        </View>
+      </Camera>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  camera: {
+    flex: 1,
+  },
+  buttonContainer: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    flexDirection: 'row',
+    margin: 20,
+  },
+});
+```
+
+### `ipfs.js`
+
+```javascript
+import * as IPFS from 'ipfs-core';
+
+const ipfs = await IPFS.create();
+
+const uploadToIPFS = async (fileUri) => {
+  try {
+    const file = await FileSystem.readAsStringAsync(fileUri, {
+      encoding: FileSystem.EncodingType.Base64,
+    });
+
+    const { cid } = await ipfs.add(Buffer.from(file, 'base64'));
+    console.log('File uploaded to IPFS with CID:', cid);
+    return cid;
+  } catch (error) {
+    console.error('Error uploading to IPFS:', error);
+  }
+};
+
+export default uploadToIPFS;
+```
+
+### `blockchain.js`
+
+```javascript
+import Web3 from 'web3';
+
+const web3 = new Web3('https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID');
+
+const smartContractAddress = 'YOUR_SMART_CONTRACT_ADDRESS';
+const smartContractABI = [
+  // Your smart contract ABI
+];
+
+const contract = new web3.eth.Contract(smartContractABI, smartContractAddress);
+
+export const addProofToBlockchain = async (userAddress, ipfsHash) => {
+  try {
+    const tx = await contract.methods.addProof(userAddress, ipfsHash).send({ from: userAddress });
+    console.log('Transaction successful:', tx);
+    return tx;
+  } catch (error) {
+    console.error('Error adding proof to blockchain:', error);
+  }
+};
+```
+
+### `package.json`
+
+```javascript
+{
+  "name": "FlowStakeApp",
+  "version": "1.0.0",
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "^46.0.0",
+    "expo-camera": "^12.2.0",
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
+    "react-native": "0.64.2",
+    "react-native-web": "0.17.1",
+    "react-navigation": "^4.4.4",
+    "react-navigation-stack": "^2.10.4",
+    "ipfs-core": "^0.12.1",
+    "web3": "^1.5.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0"
+  },
+  "private": true
+}
+```
+
+### `babel.config.js`
+
+```javascript
+module.exports = function(api) {
+  api.cache(true);
+  return {
+    presets: ['babel-preset-expo'],
+  };
+};
+```
+
+### `app.json`
+
+```javascript
+{
+  "expo": {
+    "name": "FlowStakeApp",
+    "slug": "flowstakeapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "updates": {
+      "fallbackToCacheTimeout": 0
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}
+```
+
+FIN
