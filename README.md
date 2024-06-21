@@ -49,7 +49,7 @@
 
 By meeting these requirements, FlowStake technology can create a robust, secure, and user-friendly system for photo and video attestation, enhancing the credibility and engagement of the platform.
 
-# FlowStake Technology / Distributed Olympics: Photo/Video Attestation Platform
+# FlowStake Technology: Photo/Video Attestation Platform
 
 This project is built using Expo and React Native, integrating IPFS for media storage and blockchain for data immutability.
 
